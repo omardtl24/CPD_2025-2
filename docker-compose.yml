@@ -1,0 +1,10 @@
+services:
+  ejercicio_0:
+    build:
+      context: ./Exercise 0
+      dockerfile: Dockerfile
+    container_name: ejercicio_0
+    working_dir: /app
+    command: tail -f /dev/null
+    volumes:
+      - ./Exercise 0:/app
