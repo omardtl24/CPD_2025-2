@@ -169,12 +169,9 @@ public final class ReciprocalArraySum {
         assert input.length % 2 == 0;
         ReciprocalArraySumTask task1 = new ReciprocalArraySumTask(0, input.length / 2, input);
         ReciprocalArraySumTask task2 = new ReciprocalArraySumTask(input.length / 2, input.length, input);
-        COMMON_POOL.invoke(new RecursiveAction() {
-            @Override
-            protected void compute() {
-                invokeAll(task1, task2);
-            }
-        });
+        task1.fork();       // executes asynchronously in common pool
+        task2.compute();    // compute the right half directly
+        task1.join();       // wait for left to finish
         return task1.getValue() + task2.getValue();
     }
 
