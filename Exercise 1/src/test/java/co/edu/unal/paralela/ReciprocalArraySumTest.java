@@ -9,7 +9,9 @@ public class ReciprocalArraySumTest extends TestCase {
     final static private int REPEATS = 60;
 
     private static int getNCores() {
-            return Runtime.getRuntime().availableProcessors();
+            int n = Runtime.getRuntime().availableProcessors();
+            System.out.println("Núm. de núcleos disponibles: " + n);
+            return n;
     }
 
     /**

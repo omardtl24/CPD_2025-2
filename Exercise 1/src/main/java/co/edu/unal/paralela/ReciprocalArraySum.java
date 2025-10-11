@@ -2,13 +2,17 @@ package co.edu.unal.paralela;
 
 import java.util.concurrent.RecursiveAction;
 import java.util.concurrent.ForkJoinPool;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Clase que contiene los métodos para implementar la suma de los recíprocos de un arreglo usando paralelismo.
  */
 public final class ReciprocalArraySum {
+
+    /** 
+     * Pool común para todas las operaciones paralelas. 
+     * Reutilizar el mismo ForkJoinPool evita la sobrecarga de creación de hilos.
+     */
+    private static final ForkJoinPool COMMON_POOL = ForkJoinPool.commonPool();
 
     /**
      * Constructor.
@@ -104,6 +108,8 @@ public final class ReciprocalArraySum {
          */
         private double value;
 
+        private static final int SEQUENTIAL_THRESHOLD = 100_000;
+
         /**
          * Constructor.
          * @param setStartIndexInclusive establece el índice inicial para comenzar
@@ -129,20 +135,25 @@ public final class ReciprocalArraySum {
         @Override
         protected void compute() {
             int length = endIndexExclusive - startIndexInclusive;
-            // Caso base: sumar secuencialmente
-            if (length <= 1) {
-                value = 1 / input[startIndexInclusive];
+            if (length <= SEQUENTIAL_THRESHOLD) {
+                double sum = 0;
+                for (int i = startIndexInclusive; i < endIndexExclusive; i++) {
+                    sum += 1.0 / input[i];
+                }
+                value = sum;
             } else {
-                // Dividir en dos subtareas
                 int mid = startIndexInclusive + length / 2;
                 ReciprocalArraySumTask left = new ReciprocalArraySumTask(startIndexInclusive, mid, input);
                 ReciprocalArraySumTask right = new ReciprocalArraySumTask(mid, endIndexExclusive, input);
-                left.fork();           // Ejecuta la izquierda en paralelo
-                right.compute();       // Ejecuta la derecha en el hilo actual
-                left.join();           // Espera que la izquierda termine
+
+                left.fork();       // run left in parallel
+                right.compute();   // compute right directly
+                left.join();       // wait for left to finish
+
                 value = left.getValue() + right.getValue();
             }
         }
+
     }
 
     /**
@@ -156,13 +167,14 @@ public final class ReciprocalArraySum {
      */
     protected static double parArraySum(final double[] input) {
         assert input.length % 2 == 0;
-        ForkJoinPool pool = new ForkJoinPool(2);
         ReciprocalArraySumTask task1 = new ReciprocalArraySumTask(0, input.length / 2, input);
         ReciprocalArraySumTask task2 = new ReciprocalArraySumTask(input.length / 2, input.length, input);
-        pool.execute(task1);
-        pool.execute(task2);
-        task1.join();
-        task2.join();
+        COMMON_POOL.invoke(new RecursiveAction() {
+            @Override
+            protected void compute() {
+                invokeAll(task1, task2);
+            }
+        });
         return task1.getValue() + task2.getValue();
     }
 
@@ -176,25 +188,33 @@ public final class ReciprocalArraySum {
      * @param numTasks El número de tareas para crear
      * @return La suma de los recíprocos del arreglo de entrada
      */
-    protected static double parManyTaskArraySum(final double[] input,
-            final int numTasks) {
-        double sum = 0;
+    /**
+ * Calculates the sum of reciprocals in parallel using `numTasks` tasks.
+ */
+    protected static double parManyTaskArraySum(final double[] input, final int numTasks) {
+        ReciprocalArraySumTask[] tasks = new ReciprocalArraySumTask[numTasks];
 
-        ForkJoinPool pool = new ForkJoinPool(numTasks);
-        List<ReciprocalArraySumTask> tasks = new ArrayList<>();
-        int chunkSize = input.length / numTasks;
+        // Create the subtasks for each chunk
         for (int i = 0; i < numTasks; i++) {
             int start = getChunkStartInclusive(i, numTasks, input.length);
             int end = getChunkEndExclusive(i, numTasks, input.length);
-            tasks.add(new ReciprocalArraySumTask(start, end, input));
+            tasks[i] = new ReciprocalArraySumTask(start, end, input);
         }
-        for (ReciprocalArraySumTask task : tasks) {
-            pool.execute(task);
-        }
-        for (ReciprocalArraySumTask task : tasks) {
-            task.join();
-            sum += task.getValue();
+
+        // Run all tasks in parallel inside the pool
+        COMMON_POOL.invoke(new RecursiveAction() {
+            @Override
+            protected void compute() {
+                invokeAll(tasks);
+            }
+        });
+
+        // Combine the results
+        double sum = 0;
+        for (ReciprocalArraySumTask t : tasks) {
+            sum += t.getValue();
         }
         return sum;
     }
+
 }
