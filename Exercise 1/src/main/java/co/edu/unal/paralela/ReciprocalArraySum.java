@@ -108,7 +108,7 @@ public final class ReciprocalArraySum {
          */
         private double value;
 
-        private static final int SEQUENTIAL_THRESHOLD = 100_000;
+        private int SEQUENTIAL_THRESHOLD;
 
         /**
          * Constructor.
@@ -122,6 +122,7 @@ public final class ReciprocalArraySum {
             this.startIndexInclusive = setStartIndexInclusive;
             this.endIndexExclusive = setEndIndexExclusive;
             this.input = setInput;
+            this.SEQUENTIAL_THRESHOLD = this.input.length / (COMMON_POOL.getParallelism());
         }
 
         /**
