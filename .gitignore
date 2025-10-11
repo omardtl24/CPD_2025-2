@@ -1,5 +1,2 @@
-#jar files
-*.jar
-
 #Target directory
 */target/

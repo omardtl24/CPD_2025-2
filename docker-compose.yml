@@ -8,3 +8,13 @@ services:
     command: tail -f /dev/null
     volumes:
       - ./Exercise 0:/app
+  
+  ejercicio_1:
+    build:
+      context: ./Exercise 1
+      dockerfile: Dockerfile
+    container_name: ejercicio_1
+    working_dir: /app
+    command: tail -f /dev/null
+    volumes:
+      - ./Exercise 1:/app
