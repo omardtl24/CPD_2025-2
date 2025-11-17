@@ -102,14 +102,14 @@ public class ReciprocalArraySumTest extends TestCase {
         final long seqTime = (seqEndTime - seqStartTime) / REPEATS;
         final long parTime = (parEndTime - parStartTime) / REPEATS;
 
-        return (double)seqTime / (double)parTime;
+        return (double)seqTime / (double)parTime;   //speedup = T1 / Tinf
     }
 
     /**
      * Prueba que la implementación de dos tareas en paralelo calcula correctamente los resultados para arreglos con un millón de elementos.
      */
     public void testParSimpleTwoMillion() {
-        final double minimalExpectedSpeedup = 1.5;
+        final double minimalExpectedSpeedup = 1.5;      //Ideal SpeedUp = 2
         final double speedup = parTestHelper(2_000_000, false, 2);
         final String errMsg = String.format("Se esperaba que la implementación de dos tareas en paralelo pudiera ejecutarse " +
                 " %fx veces más rápido, pero solo alcanzo a mejorar la rapidez (speedup) %fx veces", minimalExpectedSpeedup, speedup);
@@ -151,3 +151,9 @@ public class ReciprocalArraySumTest extends TestCase {
         assertTrue(errMsg, speedup >= minimalExpectedSpeedup);
     }
 }
+
+
+// Speedup = T1 / Tinf = Work / Span
+
+// Ley de Ahmdahl = Speedup <= 1 / (F + (1-F)/P) donde F es la fracción de trabajo secuencial 
+//                                                y P el número de procesadores
