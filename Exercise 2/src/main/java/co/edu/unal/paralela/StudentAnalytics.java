@@ -46,12 +46,12 @@ public final class StudentAnalytics {
      */
     public double averageAgeOfEnrolledStudentsParallelStream(
             final Student[] studentArray) {
-        final java.util.List<Student> list = Arrays.asList(studentArray);
-        return list.parallelStream()
-                .filter(s -> s.checkIsCurrent())
-                .mapToDouble(s -> s.getAge())
-                .average()
-                .orElse(0.0);
+        return Arrays.stream(studentArray)
+                     .parallel()
+                     .filter(s -> s.checkIsCurrent())
+                     .mapToDouble(s -> s.getAge())
+                     .average()
+                     .orElse(0.0);
     }
 
     /**
@@ -103,19 +103,19 @@ public final class StudentAnalytics {
      * @return Nombre más comun de los estudiantes inactivos.
      */
      public String mostCommonFirstNameOfInactiveStudentsParallelStream(final Student[] studentArray) {
-        final java.util.List<Student> list = Arrays.asList(studentArray);
-        return list.parallelStream()
-            .filter(s -> !s.checkIsCurrent())   // Pipeline: Filtrar estudiantes inactivos
-            .map(Student::getFirstName)         // Pipeline: Extraer nombre
-            .collect(Collectors.groupingBy(     // Pipeline: Agrupar por nombre
-                name -> name,                   // Función de agrupación
-                HashMap::new,                   // Supplier: HashMap simple 
-                Collectors.counting()           // Downstream: contar ocurrencias
-            ))
-            .entrySet().parallelStream()         // Pipeline: Stream paralelo del Map
-            .max(Map.Entry.comparingByValue())  // Pipeline: Encontrar el más común
-            .map(Map.Entry::getKey)             // Pipeline: Extraer la clave
-            .orElse(null);                       // Caso cuando no hay estudiantes
+        return Arrays.stream(studentArray)
+                     .parallel()
+                     .filter(s -> !s.checkIsCurrent())   // Pipeline: Filtrar estudiantes inactivos
+                     .map(Student::getFirstName)         // Pipeline: Extraer nombre
+                     .collect(Collectors.groupingBy(     // Pipeline: Agrupar por nombre
+                         name -> name,                   // Función de agrupación
+                         HashMap::new,                   // Supplier: HashMap simple 
+                         Collectors.counting()           // Downstream: contar ocurrencias
+                     ))
+                     .entrySet().parallelStream()         // Pipeline: Stream paralelo del Map
+                     .max(Map.Entry.comparingByValue())  // Pipeline: Encontrar el más común
+                     .map(Map.Entry::getKey)             // Pipeline: Extraer la clave
+                     .orElse(null);                       // Caso cuando no hay estudiantes
         
     }
         
@@ -152,9 +152,11 @@ public final class StudentAnalytics {
      */
     public int countNumberOfFailedStudentsOlderThan20ParallelStream(
             final Student[] studentArray) {
-        final java.util.List<Student> list = Arrays.asList(studentArray);
-        return (int) list.parallelStream()
-                         .filter(s -> s.getAge() > 20 && s.getGrade() < 65 && !s.checkIsCurrent())
-                         .count();
+            return (int) Arrays.stream(studentArray)
+                        .parallel()
+                        .filter(s -> s.getAge() > 20)
+                        .filter(s -> s.getGrade() < 65)
+                        .filter(s -> !s.checkIsCurrent())
+                        .count();
     }
 }
