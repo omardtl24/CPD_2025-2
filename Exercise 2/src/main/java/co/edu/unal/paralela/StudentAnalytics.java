@@ -48,10 +48,10 @@ public final class StudentAnalytics {
             final Student[] studentArray) {
         return Arrays.stream(studentArray)
                      .parallel()
-                     .filter(s -> s.checkIsCurrent())
-                     .mapToDouble(s -> s.getAge())
-                     .average()
-                     .orElse(0.0);
+                     .filter(s -> s.checkIsCurrent())     // Pipeline: Filtrar estudiantes activos
+                     .mapToDouble(s -> s.getAge())        // Pipeline: Mapear a edades (double)
+                     .average()                           // Pipeline: Calcular el promedio
+                     .orElse(0.0);                        // Caso cuando no hay estudiantes activos
     }
 
     /**
@@ -112,10 +112,10 @@ public final class StudentAnalytics {
                          HashMap::new,                   // Supplier: HashMap simple 
                          Collectors.counting()           // Downstream: contar ocurrencias
                      ))
-                     .entrySet().parallelStream()         // Pipeline: Stream paralelo del Map
+                     .entrySet().parallelStream()        // Pipeline: Stream paralelo del Map
                      .max(Map.Entry.comparingByValue())  // Pipeline: Encontrar el más común
                      .map(Map.Entry::getKey)             // Pipeline: Extraer la clave
-                     .orElse(null);                       // Caso cuando no hay estudiantes
+                     .orElse(null);                      // Caso cuando no hay estudiantes
         
     }
         
@@ -154,9 +154,9 @@ public final class StudentAnalytics {
             final Student[] studentArray) {
             return (int) Arrays.stream(studentArray)
                         .parallel()
-                        .filter(s -> s.getAge() > 20)
-                        .filter(s -> s.getGrade() < 65)
-                        .filter(s -> !s.checkIsCurrent())
-                        .count();
+                        .filter(s -> s.getAge() > 20)         // Pipeline: Filtrar estudiantes mayores de 20 años
+                        .filter(s -> s.getGrade() < 65)       // Pipeline: Filtrar estudiantes con calificación menor a 65
+                        .filter(s -> !s.checkIsCurrent())     // Pipeline: Filtrar estudiantes inactivos
+                        .count();                             // Pipeline: Contar los elementos que cumplen las condiciones
     }
 }
