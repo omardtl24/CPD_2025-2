@@ -154,9 +154,7 @@ public final class StudentAnalytics {
             final Student[] studentArray) {
         final java.util.List<Student> list = Arrays.asList(studentArray);
         return (int) list.parallelStream()
-                         .filter(s -> !s.checkIsCurrent())   // Pipeline: Filtrar estudiantes inactivos
-                         .filter(s -> s.getAge() > 20)       // Pipeline: Filtrar por edad > 20
-                         .filter(s -> s.getGrade() < 65)     // Pipeline: Filtrar por nota < 65
+                         .filter(s -> s.getAge() > 20 && s.getGrade() < 65 && !s.checkIsCurrent())
                          .count();
     }
 }
