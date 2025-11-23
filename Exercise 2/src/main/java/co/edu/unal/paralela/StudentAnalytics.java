@@ -153,9 +153,10 @@ public final class StudentAnalytics {
     public int countNumberOfFailedStudentsOlderThan20ParallelStream(
             final Student[] studentArray) {
         final java.util.List<Student> list = Arrays.asList(studentArray);
-        return list.parallelStream()
-                .filter(s -> !s.checkIsCurrent() && s.getAge() > 20 && s.getGrade() < 65)
-                .mapToInt(s -> 1)
-                .sum();
+        return (int) list.parallelStream()
+                         .filter(s -> !s.checkIsCurrent())   // Pipeline: Filtrar estudiantes inactivos
+                         .filter(s -> s.getAge() > 20)       // Pipeline: Filtrar por edad > 20
+                         .filter(s -> s.getGrade() < 65)     // Pipeline: Filtrar por nota < 65
+                         .count();
     }
 }
