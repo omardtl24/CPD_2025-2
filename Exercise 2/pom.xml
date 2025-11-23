@@ -53,17 +53,22 @@
                     </executions>
                 </plugin>
                 <plugin>
-                    <!-- executes test with -Xmx option -->
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.17</version>
-                    <configuration>
-                        <forkMode>pertest</forkMode> 
-                        <argLine>-Xmx4g</argLine>
-                        <useSystemClassLoader>true</useSystemClassLoader>
-                        <testFailureIgnore>true</testFailureIgnore>
-                    </configuration>
-                </plugin>
+    <!-- executes test with -Xmx option -->
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>2.17</version>
+    <configuration>
+        <forkMode>pertest</forkMode>
+        
+        <!-- Force JVM to pretend it only has 6 CPUs -->
+        <argLine>-Xmx4g -XX:ActiveProcessorCount=6</argLine>
+        
+        <useSystemClassLoader>true</useSystemClassLoader>
+        <testFailureIgnore>true</testFailureIgnore>
+    </configuration>
+</plugin>
+
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
